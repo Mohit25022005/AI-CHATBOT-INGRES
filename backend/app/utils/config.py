@@ -6,7 +6,11 @@ from pydantic import BaseSettings
 load_dotenv()
 
 class Settings(BaseSettings):
-    OPENAI_API_KEY: str
+    # Local ML model settings
+    EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"  # SentenceTransformer model
+    LLM_MODEL: str = "tiiuae/falcon-7b-instruct"  # Hugging Face model
+    
+    # Optional external services
     JIRA_API_TOKEN: str = ""
     JIRA_BASE_URL: str = ""
     JIRA_PROJECT_KEY: str = ""

@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { errorCodeService } from '@/services/errorCodeService';
 import { ticketService } from '@/services/ticketService';
 import { logAnalysisService } from '@/services/logAnalysisService';
+import { chatApiService } from '@/services/chatApiService';
 import heroImage from '@/assets/ingres-hero.jpg';
 
 interface Message {
@@ -128,66 +129,88 @@ export const ChatInterface = () => {
         return;
       }
 
-      // Simulate AI response with different types based on message content
-      setTimeout(() => {
-        let responseContent = '';
-        let messageType: Message['type'] = 'text';
-        let status: Message['status'] | undefined;
-        let canCreateTicket = false;
-
-        if (content.toLowerCase().includes('troubleshoot') || content.toLowerCase().includes('error')) {
-          responseContent = "I'll help you diagnose this issue. Let me run some diagnostics on your INGRES database configuration...\n\nBased on your description, here are some initial troubleshooting steps:\n\n• Check database server connectivity\n• Verify user permissions and authentication\n• Review recent system logs for error patterns\n• Examine database configuration settings\n\nIf the issue persists, I can help you create a support ticket.";
-          messageType = 'diagnostic';
-          status = 'completed';
-          canCreateTicket = true;
-        } else if (content.toLowerCase().includes('ticket') || content.toLowerCase().includes('support')) {
-          responseContent = "I'll create a support ticket for you based on your description.";
-          messageType = 'ticket';
-          status = 'processing';
-        } else if (content.toLowerCase().includes('documentation') || content.toLowerCase().includes('docs')) {
-          responseContent = "Here are the most relevant INGRES documentation sections for your query:\n\n• Database Configuration Guide (v12.2)\n• Performance Optimization Best Practices\n• Troubleshooting Connection Issues\n• User Management and Security\n• Backup and Recovery Procedures\n\nWould you like me to dive deeper into any specific topic?";
-        } else {
-          responseContent = "I understand you're asking about INGRES. I can help you with:\n\n• **Documentation lookup** - Find specific guides and references\n• **Error diagnosis** - Analyze error codes and logs\n• **Troubleshooting** - Step-by-step issue resolution\n• **Support tickets** - File and track support requests\n• **Performance optimization** - Database tuning advice\n\nPlease be more specific about your needs, or upload a log file for analysis.";
-          canCreateTicket = false;
-        }
+      // Call backend API for AI response
+      try {
+        const sessionId = `session_${Date.now()}`;
+        const apiResponse = await chatApiService.sendMessage({
+          message: content,
+          session_id: sessionId
+        });
 
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
-          content: responseContent,
+          content: apiResponse.reply,
           sender: 'assistant',
           timestamp: new Date(),
-          type: messageType,
-          status,
-          canCreateTicket
+          type: 'text',
+          status: 'completed',
+          canCreateTicket: true // Enable ticket creation for all responses
         };
 
         setMessages(prev => [...prev, assistantMessage]);
         setIsProcessing(false);
+        
+        // Only create ticket if user explicitly requests it with specific phrases
+        if (content.toLowerCase().includes('create ticket') || 
+            content.toLowerCase().includes('create support ticket') ||
+            content.toLowerCase().includes('file a ticket') ||
+            content.toLowerCase().includes('submit ticket')) {
+          setTimeout(async () => {
+            try {
+              const ticketResponse = await chatApiService.createTicket({
+                session_id: sessionId,
+                issue: content,
+                chat_history: messages.map(m => ({ role: m.sender, content: m.content }))
+              });
+              
+              const ticketMessage: Message = {
+                id: (Date.now() + 2).toString(),
+                content: `Support ticket created successfully!\n\n**Ticket ID:** ${ticketResponse.ticket_id}\n**Status:** ${ticketResponse.status}\n\nYour issue has been logged and assigned to our support team. You can track the progress in the [Tickets](/tickets) section.`,
+                sender: 'assistant',
+                timestamp: new Date(),
+                type: 'ticket',
+                status: 'completed',
+                ticketId: ticketResponse.ticket_id
+              };
 
-        // Handle ticket creation
-        if (messageType === 'ticket') {
-          setTimeout(() => {
-            const ticket = ticketService.createTicket(content, errorCodes);
-            
-            const ticketMessage: Message = {
-              id: (Date.now() + 2).toString(),
-              content: `Support ticket created successfully!\n\n**Ticket ID:** ${ticket.id}\n**Priority:** ${ticket.priority}\n**Category:** ${ticket.category}\n**Status:** ${ticket.status}\n\nYour issue has been logged and assigned to our support team. You can track the progress in the [Tickets](/tickets) section.`,
-              sender: 'assistant',
-              timestamp: new Date(),
-              type: 'ticket',
-              status: 'completed',
-              ticketId: ticket.id
-            };
-
-            setMessages(prev => [...prev, ticketMessage]);
-            
-            toast({
-              title: 'Support Ticket Created',
-              description: `Ticket ${ticket.id} has been filed successfully.`,
-            });
+              setMessages(prev => [...prev, ticketMessage]);
+              
+              toast({
+                title: 'Support Ticket Created',
+                description: `Ticket ${ticketResponse.ticket_id} has been filed successfully.`,
+              });
+            } catch (ticketError) {
+              console.error('Failed to create ticket:', ticketError);
+              toast({
+                title: 'Ticket Creation Failed',
+                description: 'Could not create support ticket. Please try again.',
+                variant: 'destructive'
+              });
+            }
           }, 1500);
         }
-      }, 2000);
+      } catch (apiError) {
+        console.error('Backend API call failed:', apiError);
+        setIsProcessing(false);
+        
+        // Fallback to a generic response if API fails
+        const fallbackMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: 'I\'m having trouble connecting to the backend service right now. Please make sure the backend server is running on port 8000, or try again in a moment.',
+          sender: 'assistant',
+          timestamp: new Date(),
+          type: 'text',
+          status: 'error'
+        };
+        
+        setMessages(prev => [...prev, fallbackMessage]);
+        
+        toast({
+          title: 'Connection Error',
+          description: 'Cannot connect to backend service. Please check if the server is running.',
+          variant: 'destructive'
+        });
+      }
 
     } catch (error) {
       setIsProcessing(false);

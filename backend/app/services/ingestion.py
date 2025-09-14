@@ -15,9 +15,8 @@ import numpy as np
 import faiss
 from PyPDF2 import PdfReader
 from app.utils.config import settings
-import openai
-
-openai.api_key = settings.OPENAI_API_KEY
+from sentence_transformers import SentenceTransformer
+from app.utils.logger import logger
 
 DATA_DOCS = Path(__file__).resolve().parents[2] / "data" / "docs"
 EMBED_DIR = Path(__file__).resolve().parents[2] / "data" / "embeddings"
@@ -43,9 +42,20 @@ def chunk_text(text: str, chunk_size: int = 800, overlap: int = 100) -> List[str
         i += chunk_size - overlap
     return chunks
 
+# Initialize the embedding model (singleton pattern)
+_embedding_model = None
+
+def get_embedding_model():
+    global _embedding_model
+    if _embedding_model is None:
+        logger.info(f"Loading embedding model: {settings.EMBEDDING_MODEL}")
+        _embedding_model = SentenceTransformer(settings.EMBEDDING_MODEL)
+    return _embedding_model
+
 def get_embedding(text: str):
-    res = openai.Embedding.create(model="text-embedding-3-small", input=text)
-    return np.array(res["data"][0]["embedding"], dtype="float32")
+    model = get_embedding_model()
+    embedding = model.encode([text])[0]
+    return np.array(embedding, dtype="float32")
 
 def load_or_create_index(index_path: str, meta_path: str):
     meta_path_p = Path(meta_path)
@@ -74,8 +84,9 @@ def load_or_create_index(index_path: str, meta_path: str):
             metadatas.append({"source": str(file.name), "title": f"{file.name} - chunk {i}", "text": c})
 
     if not texts:
-        # empty index
-        dim = 1536
+        # empty index - use default embedding dimension
+        model = get_embedding_model()
+        dim = model.get_sentence_embedding_dimension()
         index = faiss.IndexFlatL2(dim)
         faiss.write_index(index, str(index_path_p))
         with open(meta_path_p, "w", encoding="utf-8") as f:
