@@ -1,0 +1,37 @@
+📚 ADD YOUR OFFICIAL INGRES PDF DOCUMENTATION HERE
+
+Current Location: C:\Users\mohit\ai-chatbot-ingres\backend\data\docs\
+
+INSTRUCTIONS:
+1. Copy your downloaded INGRES PDF files to this directory
+2. Supported formats: PDF, TXT, MD
+3. Example filenames:
+   - INGRES_Installation_Guide.pdf
+   - INGRES_User_Manual.pdf  
+   - INGRES_Reference_Guide.pdf
+   - INGRES_Error_Codes.pdf
+   - INGRES_Configuration.pdf
+   - Any other INGRES documentation PDFs
+
+AFTER COPYING FILES:
+1. Go back to the terminal/PowerShell
+2. Run the document ingestion process
+3. Test your enhanced chatbot!
+
+The system will automatically:
+✅ Extract text from all PDF files
+✅ Split documents into searchable chunks  
+✅ Generate vector embeddings
+✅ Build searchable knowledge base
+✅ Enable intelligent responses about INGRES
+
+Your chatbot will then be able to answer detailed questions about:
+- INGRES installation procedures
+- Configuration settings
+- Error troubleshooting  
+- Performance optimization
+- Security configurations
+- API usage
+- And much more from your official documentation!
+
+🚀 Ready to make your chatbot incredibly smart about INGRES!
