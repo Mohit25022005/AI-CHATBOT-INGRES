@@ -1,0 +1,95 @@
+
+================================================================================
+INGRES AI CHATBOT EVALUATION REPORT (SIMPLIFIED)
+================================================================================
+
+📊 OVERVIEW
+-----------
+Total Test Cases: 10
+Evaluation Date: 2025-09-17 23:03:15
+
+🎯 OVERALL PERFORMANCE METRICS
+------------------------------
+Word Overlap Similarity:
+  • Average:      0.0711 ± 0.0415
+  • Range:        0.0164 - 0.1667
+
+BLEU-style Score:
+  • Average:      0.2000 ± 0.0836
+  • Range:        0.0556 - 0.2778
+
+📈 PERFORMANCE BY CATEGORY
+---------------------------
+
+BACKUP (1 tests):
+  • Similarity:   0.0741 ± 0.0000
+  • BLEU:         0.2222 ± 0.0000
+
+CONFIGURATION (1 tests):
+  • Similarity:   0.1667 ± 0.0000
+  • BLEU:         0.2778 ± 0.0000
+
+CONNECTION (1 tests):
+  • Similarity:   0.0893 ± 0.0000
+  • BLEU:         0.2778 ± 0.0000
+
+DATA_TYPES (1 tests):
+  • Similarity:   0.0357 ± 0.0000
+  • BLEU:         0.1111 ± 0.0000
+
+ERROR_HANDLING (1 tests):
+  • Similarity:   0.0667 ± 0.0000
+  • BLEU:         0.2222 ± 0.0000
+
+MAINTENANCE (1 tests):
+  • Similarity:   0.0862 ± 0.0000
+  • BLEU:         0.2778 ± 0.0000
+
+MONITORING (1 tests):
+  • Similarity:   0.0364 ± 0.0000
+  • BLEU:         0.1111 ± 0.0000
+
+PERFORMANCE (1 tests):
+  • Similarity:   0.0164 ± 0.0000
+  • BLEU:         0.0556 ± 0.0000
+
+TRANSACTIONS (1 tests):
+  • Similarity:   0.0577 ± 0.0000
+  • BLEU:         0.1667 ± 0.0000
+
+TROUBLESHOOTING (1 tests):
+  • Similarity:   0.0820 ± 0.0000
+  • BLEU:         0.2778 ± 0.0000
+
+🏆 PERFORMANCE ASSESSMENT
+-------------------------
+Word Overlap Similarity (0.0711):
+  🔴 NEEDS IMPROVEMENT - Low word overlap
+
+BLEU Score (0.2000):
+  🔴 NEEDS IMPROVEMENT - Low lexical precision
+
+📝 SAMPLE RESPONSE COMPARISONS
+==================================================
+
+🥇 BEST PERFORMANCE (Similarity: 0.1667)
+Question: What is the default port for INGRES database connections?
+
+Expected: The default port for INGRES database connections is 21064. This port is used for client-server communication between INGRES applications and the database server....
+
+Generated: Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting....
+
+🥉 NEEDS IMPROVEMENT (Similarity: 0.0164)
+Question: How do I optimize query performance in INGRES?
+
+Expected: To optimize query performance in INGRES, create appropriate indexes on frequently queried columns, analyze and update table statistics regularly, use query plans to understand execution paths, avoid u...
+
+Generated: Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting....
+
+================================================================================
+NOTE: This is a simplified evaluation using basic word overlap metrics.
+For more advanced BERT scoring, resolve the dependency conflicts.
+================================================================================
+EVALUATION COMPLETE
+Files generated in: evaluation_results
+================================================================================

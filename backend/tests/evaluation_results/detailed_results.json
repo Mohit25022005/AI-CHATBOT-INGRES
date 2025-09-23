@@ -1,0 +1,215 @@
+{
+  "responses": [
+    {
+      "question": "How do I connect to an INGRES database?",
+      "generated_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "raw_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "expected_answer": "To connect to an INGRES database, you need to use the INGRES CONNECT statement or a database driver. First, ensure the database server is running on the default port 21064. Use the syntax CONNECT TO database_name or configure your connection string with the server hostname, port, database name, and authentication credentials. Make sure your network settings allow connections to the INGRES server.",
+      "category": "connection",
+      "test_id": 1,
+      "similarity_score": 0.0893,
+      "bleu_score": 0.2778
+    },
+    {
+      "question": "What is the default port for INGRES database connections?",
+      "generated_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "raw_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "expected_answer": "The default port for INGRES database connections is 21064. This port is used for client-server communication between INGRES applications and the database server.",
+      "category": "configuration",
+      "test_id": 2,
+      "similarity_score": 0.1667,
+      "bleu_score": 0.2778
+    },
+    {
+      "question": "How do I troubleshoot connection timeout errors?",
+      "generated_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "raw_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "expected_answer": "To troubleshoot connection timeout errors, first check if the database server is running and accessible. Verify the network connectivity between client and server, ensure the correct port (21064) is open and not blocked by firewalls. Check server logs for any connection issues, verify your connection parameters including hostname, port, and credentials. Consider increasing timeout values in your connection configuration if the network has high latency.",
+      "category": "troubleshooting",
+      "test_id": 3,
+      "similarity_score": 0.082,
+      "bleu_score": 0.2778
+    },
+    {
+      "question": "What are INGRES transaction isolation levels?",
+      "generated_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "raw_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "expected_answer": "INGRES supports multiple transaction isolation levels to control concurrent access to data. These include READ UNCOMMITTED (lowest isolation), READ COMMITTED (prevents dirty reads), REPEATABLE READ (prevents dirty and non-repeatable reads), and SERIALIZABLE (highest isolation, prevents phantom reads). You can set the isolation level using SET TRANSACTION ISOLATION LEVEL command.",
+      "category": "transactions",
+      "test_id": 4,
+      "similarity_score": 0.0577,
+      "bleu_score": 0.1667
+    },
+    {
+      "question": "How do I optimize query performance in INGRES?",
+      "generated_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "raw_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "expected_answer": "To optimize query performance in INGRES, create appropriate indexes on frequently queried columns, analyze and update table statistics regularly, use query plans to understand execution paths, avoid unnecessary joins and subqueries, optimize WHERE clauses with selective conditions, and consider partitioning large tables. Use the OPTIMIZEDB utility to maintain optimal performance and review query execution plans with EXPLAIN.",
+      "category": "performance",
+      "test_id": 5,
+      "similarity_score": 0.0164,
+      "bleu_score": 0.0556
+    },
+    {
+      "question": "What should I do if I encounter error E_US0010?",
+      "generated_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "raw_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "expected_answer": "Error E_US0010 typically indicates a user authentication or permission issue. To resolve this, verify your username and password are correct, check if the user account exists and is active, ensure the user has proper database access permissions, verify the authentication method configured on the server matches your client settings, and check if there are any account lockout policies in effect.",
+      "category": "error_handling",
+      "test_id": 6,
+      "similarity_score": 0.0667,
+      "bleu_score": 0.2222
+    },
+    {
+      "question": "How do I backup an INGRES database?",
+      "generated_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "raw_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "expected_answer": "To backup an INGRES database, you can use the CHECKPOINT command for online backups or the COPYDB utility for offline backups. For online backups, use CHECKPOINT database_name to create a consistent backup point. For offline backups, stop the database server and use COPYDB to create a full copy. Consider implementing regular backup schedules and test restore procedures to ensure backup integrity.",
+      "category": "backup",
+      "test_id": 7,
+      "similarity_score": 0.0741,
+      "bleu_score": 0.2222
+    },
+    {
+      "question": "What are INGRES data types for storing large text?",
+      "generated_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "raw_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "expected_answer": "INGRES provides several data types for storing large text data. Use VARCHAR for variable-length character strings up to 32KB, LONG VARCHAR for text data larger than 32KB, TEXT for very large text objects, and CLOB (Character Large Object) for extremely large text storage. Choose the appropriate type based on your data size requirements and performance considerations.",
+      "category": "data_types",
+      "test_id": 8,
+      "similarity_score": 0.0357,
+      "bleu_score": 0.1111
+    },
+    {
+      "question": "How do I monitor INGRES server performance?",
+      "generated_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "raw_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "expected_answer": "To monitor INGRES server performance, use built-in monitoring tools like the Performance Monitor, check system catalogs for performance metrics, monitor server logs for warnings and errors, use operating system tools to track CPU, memory, and disk usage, and implement custom monitoring scripts for specific performance indicators. Regular monitoring helps identify performance bottlenecks and optimization opportunities.",
+      "category": "monitoring",
+      "test_id": 9,
+      "similarity_score": 0.0364,
+      "bleu_score": 0.1111
+    },
+    {
+      "question": "What is the process for upgrading INGRES database version?",
+      "generated_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "raw_response": "Backend not available - using mock response: This is a sample response about INGRES database configuration and troubleshooting.",
+      "expected_answer": "To upgrade INGRES database version, first backup all databases and configuration files, review the upgrade documentation for version-specific requirements, stop all INGRES services, install the new version software, run the upgrade utility to migrate databases and configurations, test the upgraded system thoroughly, and update any custom applications for compatibility. Plan for adequate downtime and have a rollback strategy ready.",
+      "category": "maintenance",
+      "test_id": 10,
+      "similarity_score": 0.0862,
+      "bleu_score": 0.2778
+    }
+  ],
+  "similarity_scores": [
+    0.0893,
+    0.1667,
+    0.082,
+    0.0577,
+    0.0164,
+    0.0667,
+    0.0741,
+    0.0357,
+    0.0364,
+    0.0862
+  ],
+  "bleu_scores": [
+    0.2778,
+    0.2778,
+    0.2778,
+    0.1667,
+    0.0556,
+    0.2222,
+    0.2222,
+    0.1111,
+    0.1111,
+    0.2778
+  ],
+  "category_stats": {
+    "connection": {
+      "count": 1,
+      "avg_similarity": 0.0893,
+      "avg_bleu": 0.2778,
+      "similarity_std": 0,
+      "bleu_std": 0
+    },
+    "configuration": {
+      "count": 1,
+      "avg_similarity": 0.1667,
+      "avg_bleu": 0.2778,
+      "similarity_std": 0,
+      "bleu_std": 0
+    },
+    "troubleshooting": {
+      "count": 1,
+      "avg_similarity": 0.082,
+      "avg_bleu": 0.2778,
+      "similarity_std": 0,
+      "bleu_std": 0
+    },
+    "transactions": {
+      "count": 1,
+      "avg_similarity": 0.0577,
+      "avg_bleu": 0.1667,
+      "similarity_std": 0,
+      "bleu_std": 0
+    },
+    "performance": {
+      "count": 1,
+      "avg_similarity": 0.0164,
+      "avg_bleu": 0.0556,
+      "similarity_std": 0,
+      "bleu_std": 0
+    },
+    "error_handling": {
+      "count": 1,
+      "avg_similarity": 0.0667,
+      "avg_bleu": 0.2222,
+      "similarity_std": 0,
+      "bleu_std": 0
+    },
+    "backup": {
+      "count": 1,
+      "avg_similarity": 0.0741,
+      "avg_bleu": 0.2222,
+      "similarity_std": 0,
+      "bleu_std": 0
+    },
+    "data_types": {
+      "count": 1,
+      "avg_similarity": 0.0357,
+      "avg_bleu": 0.1111,
+      "similarity_std": 0,
+      "bleu_std": 0
+    },
+    "monitoring": {
+      "count": 1,
+      "avg_similarity": 0.0364,
+      "avg_bleu": 0.1111,
+      "similarity_std": 0,
+      "bleu_std": 0
+    },
+    "maintenance": {
+      "count": 1,
+      "avg_similarity": 0.0862,
+      "avg_bleu": 0.2778,
+      "similarity_std": 0,
+      "bleu_std": 0
+    }
+  },
+  "overall_stats": {
+    "total_tests": 10,
+    "similarity_scores": {
+      "average": 0.0711,
+      "std": 0.0415,
+      "min": 0.0164,
+      "max": 0.1667
+    },
+    "bleu_scores": {
+      "average": 0.2,
+      "std": 0.0836,
+      "min": 0.0556,
+      "max": 0.2778
+    }
+  }
+}
