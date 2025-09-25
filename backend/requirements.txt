@@ -6,7 +6,9 @@ transformers>=4.35.0
 torch==2.1.2
 torchvision==0.16.2
 huggingface-hub>=0.21.0
-faiss-cpu==1.7.4
+faiss-cpu==1.7.4        # Optional: faiss-gpu if you want GPU indexing
+bitsandbytes>=0.39.0
+accelerate>=0.22.0
 numpy==1.26.2
 PyPDF2==3.0.1
 pydantic==1.10.12

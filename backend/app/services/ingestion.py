@@ -107,4 +107,14 @@ def load_or_create_index(index_path: str, meta_path: str):
 def run_ingest():
     index_file = str(EMBED_DIR / "faiss.index")
     meta_file = str(EMBED_DIR / "faiss.meta.json")
-    load_or_create_index(index_file, meta_file)
+
+    index, metadatas = load_or_create_index(index_file, meta_file)
+
+    if not metadatas:
+        logger.warning("⚠️ No documents were ingested. Check that data/docs/ has valid PDFs or text files.")
+    else:
+        unique_files = {m["source"] for m in metadatas}
+        logger.info(f"✅ Ingested {len(unique_files)} documents")
+        logger.info(f"📑 Created {len(metadatas)} chunks")
+        logger.info(f"💾 Stored FAISS index at {index_file}")
+        logger.info(f"📝 Metadata saved at {meta_file}")
