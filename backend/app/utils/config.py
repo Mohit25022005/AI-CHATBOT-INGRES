@@ -7,7 +7,7 @@ load_dotenv()
 class Settings(BaseSettings):
     # Local ML model settings
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"  # SentenceTransformer
-    LLM_MODEL: str = "tiiuae/falcon-7b-instruct"  # Hugging Face model, 4-bit quantization
+    LLM_MODEL: str = "facebook/opt-1.3b"  # Hugging Face model, 4-bit quantization
 
     # Optional external services
     JIRA_API_TOKEN: str = ""

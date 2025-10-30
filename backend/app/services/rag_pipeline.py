@@ -50,23 +50,31 @@ class RAGPipeline:
         self._llm_pipeline = None
 
     def _get_llm_pipeline(self):
-        """Lazy load 4-bit LLM to save memory"""
+        """Lazy load LLM — automatically switches between GPU (4-bit) and CPU modes"""
         if self._llm_pipeline is None:
             logger.info(f"Loading LLM model from config: {settings.LLM_MODEL}")
 
-            bnb_config = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.float16,
-                bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4"
-            )
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            logger.info(f"Detected device: {device.upper()}")
 
             tokenizer = AutoTokenizer.from_pretrained(settings.LLM_MODEL)
-            model = AutoModelForCausalLM.from_pretrained(
-                settings.LLM_MODEL,
-                device_map="auto",           # Auto GPU/CPU allocation
-                quantization_config=bnb_config
-            )
+
+            if device == "cuda":
+                # ✅ GPU mode — use 4-bit quantization
+                bnb_config = BitsAndBytesConfig(
+                    load_in_4bit=True,
+                    bnb_4bit_compute_dtype=torch.float16,
+                    bnb_4bit_use_double_quant=True,
+                    bnb_4bit_quant_type="nf4"
+                )
+                model = AutoModelForCausalLM.from_pretrained(
+                    settings.LLM_MODEL,
+                    device_map="auto",
+                    quantization_config=bnb_config
+                )
+            else:
+                # ✅ CPU fallback — load normally (no quantization)
+                model = AutoModelForCausalLM.from_pretrained(settings.LLM_MODEL)
 
             self._llm_pipeline = pipeline(
                 "text-generation",
@@ -74,12 +82,13 @@ class RAGPipeline:
                 tokenizer=tokenizer,
                 max_length=1024,
                 do_sample=True,
-                temperature=0.7,
+                temperature=0.2,
                 top_p=0.9,
-                device_map="auto"
+                device=0 if device == "cuda" else -1
             )
 
         return self._llm_pipeline
+
 
     def _embed_text(self, text: str) -> List[float]:
         """Embed text with SentenceTransformer"""
