@@ -1,8 +1,9 @@
 """
-Optimized RAG pipeline for RTX 4060 (8GB VRAM):
+Optimized RAG pipeline for RTX 4060 (8GB VRAM) and CPU fallback:
 - Embeds docs/queries with SentenceTransformers
 - Stores/retrieves vectors in FAISS
-- Uses 4-bit LLM (Falcon-7B-Instruct) for concise answers
+- GPU: uses Falcon-7B-Instruct in 4-bit (fast on GPU)
+- CPU: uses google/flan-t5-small (very fast and light)
 """
 
 import json
@@ -14,8 +15,13 @@ from sentence_transformers import SentenceTransformer
 from app.services.ingestion import load_or_create_index, get_embedding_model
 from app.utils.logger import logger
 import torch
-
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    AutoModelForSeq2SeqLM,
+    BitsAndBytesConfig,
+    pipeline,
+)
 
 def build_prompt(user_query: str, retrieved_chunks: List[str]) -> str:
     """Build concise prompt from retrieved chunks"""
@@ -43,24 +49,19 @@ class RAGPipeline:
         self.meta_path = str(Path(self.index_path).with_suffix(".meta.json"))
         self.index, self.metadatas = load_or_create_index(self.index_path, self.meta_path)
 
-        # Initialize embedding model
         self.embedding_model = get_embedding_model()
-
-        # Lazy-loaded LLM pipeline
         self._llm_pipeline = None
 
     def _get_llm_pipeline(self):
-        """Lazy load LLM — automatically switches between GPU (4-bit) and CPU modes"""
+        """Lazy load — auto GPU/CPU detection"""
         if self._llm_pipeline is None:
-            logger.info(f"Loading LLM model from config: {settings.LLM_MODEL}")
-
             device = "cuda" if torch.cuda.is_available() else "cpu"
             logger.info(f"Detected device: {device.upper()}")
 
-            tokenizer = AutoTokenizer.from_pretrained(settings.LLM_MODEL)
-
             if device == "cuda":
-                # ✅ GPU mode — use 4-bit quantization
+                # ✅ GPU path (Falcon-7B in 4-bit)
+                model_name = settings.LLM_MODEL or "tiiuae/falcon-7b-instruct"
+                tokenizer = AutoTokenizer.from_pretrained(model_name)
                 bnb_config = BitsAndBytesConfig(
                     load_in_4bit=True,
                     bnb_4bit_compute_dtype=torch.float16,
@@ -68,35 +69,45 @@ class RAGPipeline:
                     bnb_4bit_quant_type="nf4"
                 )
                 model = AutoModelForCausalLM.from_pretrained(
-                    settings.LLM_MODEL,
+                    model_name,
                     device_map="auto",
                     quantization_config=bnb_config
                 )
-            else:
-                # ✅ CPU fallback — load normally (no quantization)
-                model = AutoModelForCausalLM.from_pretrained(settings.LLM_MODEL)
+                self._llm_pipeline = pipeline(
+                    "text-generation",
+                    model=model,
+                    tokenizer=tokenizer,
+                    max_length=1024,
+                    temperature=0.2,
+                    top_p=0.9,
+                    do_sample=True,
+                    device=0
+                )
 
-            self._llm_pipeline = pipeline(
-                "text-generation",
-                model=model,
-                tokenizer=tokenizer,
-                max_length=1024,
-                do_sample=True,
-                temperature=0.2,
-                top_p=0.9,
-                device=0 if device == "cuda" else -1
-            )
+            else:
+                # ✅ CPU path (super-light FLAN-T5)
+                model_name = "google/flan-t5-small"
+                tokenizer = AutoTokenizer.from_pretrained(model_name)
+                model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+                self._llm_pipeline = pipeline(
+                    "text2text-generation",
+                    model=model,
+                    tokenizer=tokenizer,
+                    max_length=512,
+                    temperature=0.3,
+                    top_p=0.9,
+                    device=-1
+                )
+
+            logger.info(f"Loaded model: {model_name}")
 
         return self._llm_pipeline
 
-
     def _embed_text(self, text: str) -> List[float]:
-        """Embed text with SentenceTransformer"""
         embedding = self.embedding_model.encode([text])[0]
         return embedding.tolist()
 
     def _search(self, query: str, top_k: int = 4):
-        """Search FAISS index for relevant chunks"""
         vec = np.array(self._embed_text(query), dtype="float32").reshape(1, -1)
         D, I = self.index.search(vec, top_k)
         results = []
@@ -107,24 +118,24 @@ class RAGPipeline:
         return results
 
     def generate_response(self, query: str, session_id: str = None) -> Tuple[str, List[dict]]:
-        """Main RAG query handler"""
         docs = self._search(query, top_k=4)
-
-        retrieved_chunks = [d.get('text', '') for d in docs]
-
+        retrieved_chunks = [d.get("text", "") for d in docs]
         full_prompt = build_prompt(query, retrieved_chunks)
 
         try:
             llm = self._get_llm_pipeline()
             response = llm(
                 full_prompt,
-                max_new_tokens=300,
+                max_new_tokens=256,
                 num_return_sequences=1,
-                pad_token_id=llm.tokenizer.eos_token_id
             )
 
-            generated_text = response[0]['generated_text']
-            reply = generated_text[len(full_prompt):].strip()
+            if isinstance(response[0], dict):
+                generated_text = response[0].get("generated_text") or response[0].get("generated_text", "")
+            else:
+                generated_text = str(response[0])
+
+            reply = generated_text[len(full_prompt):].strip() if "generated_text" in response[0] else generated_text
 
             if not reply:
                 reply = self._fallback_response(docs)
@@ -136,9 +147,10 @@ class RAGPipeline:
         return reply, docs
 
     def _fallback_response(self, docs: List[dict]) -> str:
-        """Concise fallback if LLM fails"""
         if not docs:
             return "I don’t know based on the INGRES docs. Please refine your question."
-
-        snippets = [d.get('text', '')[:400] + "..." if len(d.get('text','')) > 400 else d.get('text','') for d in docs[:3]]
+        snippets = [
+            d.get("text", "")[:400] + "..." if len(d.get("text", "")) > 400 else d.get("text", "")
+            for d in docs[:3]
+        ]
         return "Here’s what the INGRES documentation says:\n\n" + "\n\n".join(snippets)
